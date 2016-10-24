@@ -18,6 +18,7 @@ package org.gradle.process.internal.daemon;
 import org.gradle.StartParameter;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.process.daemon.DaemonForkOptions;
 import org.gradle.process.internal.JavaExecHandleBuilder;
 import org.gradle.process.internal.worker.MultiRequestWorkerProcessBuilder;
 import org.gradle.process.internal.worker.WorkerProcessFactory;

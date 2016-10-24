@@ -39,7 +39,13 @@ import org.gradle.internal.service.DefaultServiceRegistry;
 import org.gradle.internal.service.ServiceRegistration;
 import org.gradle.internal.service.ServiceRegistry;
 import org.gradle.plugin.use.internal.InjectedPluginClasspath;
+import org.gradle.process.daemon.WorkerDaemonAdapter;
 import org.gradle.process.internal.JavaExecHandleFactory;
+import org.gradle.process.internal.daemon.DefaultWorkerDaemonAdapter;
+import org.gradle.process.internal.daemon.WorkerDaemonClientsManager;
+import org.gradle.process.internal.daemon.WorkerDaemonFactory;
+import org.gradle.process.internal.daemon.WorkerDaemonManager;
+import org.gradle.process.internal.daemon.WorkerDaemonStarter;
 import org.gradle.process.internal.worker.DefaultWorkerProcessFactory;
 import org.gradle.process.internal.worker.WorkerProcessFactory;
 import org.gradle.process.internal.worker.child.WorkerProcessClassPathProvider;
@@ -100,5 +106,13 @@ public class BuildSessionScopeServices extends DefaultServiceRegistry {
     GeneratedGradleJarCache createGeneratedGradleJarCache(CacheRepository cacheRepository) {
         String gradleVersion = GradleVersion.current().getVersion();
         return new DefaultGeneratedGradleJarCache(cacheRepository, gradleVersion);
+    }
+
+    WorkerDaemonManager createWorkerDaemonManager(WorkerProcessFactory workerFactory, StartParameter startParameter) {
+        return new WorkerDaemonManager(new WorkerDaemonClientsManager(new WorkerDaemonStarter(workerFactory, startParameter)));
+    }
+
+    WorkerDaemonAdapter createWorkerDaemonAdapter(WorkerDaemonManager workerDaemonManager) {
+        return new DefaultWorkerDaemonAdapter(workerDaemonManager);
     }
 }
