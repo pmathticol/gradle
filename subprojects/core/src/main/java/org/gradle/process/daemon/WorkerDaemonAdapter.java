@@ -33,7 +33,7 @@ public interface WorkerDaemonAdapter {
      * @param action - The implementation of the action to perform.
      * @param subjects - The set of subjects to perform the action against.
      */
-    <T extends Serializable> void executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, Iterable<T> subjects);
+    <T extends Serializable> void executeAllInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, Iterable<T> subjects);
 
     /**
      * Executes a single action that should be performed in a daemonized process.  Throws an exception if the action fails.
@@ -54,7 +54,7 @@ public interface WorkerDaemonAdapter {
      * @param subjects - The set of inputs to the transformations.
      * @return - A list of results from the transformations.
      */
-    <T extends Serializable, R extends Serializable> List<R> executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, Iterable<T> subjects);
+    <T extends Serializable, R extends Serializable> List<R> executeAllInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, Iterable<T> subjects);
 
     /**
      * Executes a single transformation to be performed in a daemonized process. Throws an exception if the transformation fails.

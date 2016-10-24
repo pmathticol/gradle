@@ -75,29 +75,29 @@ public abstract class WorkerDaemonTask extends DefaultTask {
         this.classpath = classpath;
     }
 
-    <T extends Serializable> void executeAllInDaemon(Action<T> action, Iterable<T> subjects) {
+    protected <T extends Serializable> void executeAllInDaemon(Action<T> action, Iterable<T> subjects) {
         Iterator<T> itr = subjects == null ? Iterators.<T>emptyIterator() : subjects.iterator();
         if (itr.hasNext()) {
             T subject = itr.next();
-            getWorkerDaemonAdapter().executeInDaemon(getProject().getProjectDir(), getDaemonOptions(action.getClass(), subject.getClass()), action, subjects);
+            getWorkerDaemonAdapter().executeAllInDaemon(getProject().getProjectDir(), getDaemonOptions(action.getClass(), subject.getClass()), action, subjects);
         }
     }
 
-    <T extends Serializable> void executeInDaemon(Action<T> action, T subject) {
+    protected <T extends Serializable> void executeInDaemon(Action<T> action, T subject) {
         getWorkerDaemonAdapter().executeInDaemon(getProject().getProjectDir(), getDaemonOptions(action.getClass(), subject.getClass()), action, subject);
     }
 
-    <T extends Serializable, R extends Serializable> List<R> executeAllInDaemon(Transformer<R, T> transformer, Iterable<T> subjects) {
+    protected <T extends Serializable, R extends Serializable> List<R> executeAllInDaemon(Transformer<R, T> transformer, Iterable<T> subjects) {
         Iterator<T> itr = subjects == null ? Iterators.<T>emptyIterator() : subjects.iterator();
         if (itr.hasNext()) {
             T subject = itr.next();
-            return getWorkerDaemonAdapter().executeInDaemon(getProject().getProjectDir(), getDaemonOptions(transformer.getClass(), subject.getClass()), transformer, subjects);
+            return getWorkerDaemonAdapter().executeAllInDaemon(getProject().getProjectDir(), getDaemonOptions(transformer.getClass(), subject.getClass()), transformer, subjects);
         } else {
             return Lists.newArrayList();
         }
     }
 
-    <T extends Serializable, R extends Serializable> R executeInDaemon(Transformer<R, T> transformer, T subject) {
+    protected <T extends Serializable, R extends Serializable> R executeInDaemon(Transformer<R, T> transformer, T subject) {
         return getWorkerDaemonAdapter().executeInDaemon(getProject().getProjectDir(), getDaemonOptions(transformer.getClass(), subject.getClass()), transformer, subject);
     }
 

@@ -39,7 +39,7 @@ public class DefaultWorkerDaemonAdapter implements WorkerDaemonAdapter {
     }
 
     @Override
-    public <T extends Serializable> void executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, Iterable<T> subjects) {
+    public <T extends Serializable> void executeAllInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, Iterable<T> subjects) {
         Iterator<T> itr = subjects == null ? Iterators.<T>emptyIterator() : subjects.iterator();
         if (itr.hasNext()) {
             WorkerDaemon daemon = workerDaemonFactory.getDaemon(workingDir, forkOptions);
@@ -52,7 +52,7 @@ public class DefaultWorkerDaemonAdapter implements WorkerDaemonAdapter {
 
     @Override
     public <T extends Serializable> void executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, T subject) {
-        executeInDaemon(workingDir, forkOptions, action, Lists.<T>newArrayList(subject));
+        executeAllInDaemon(workingDir, forkOptions, action, Lists.<T>newArrayList(subject));
     }
 
     private <T extends Serializable> void executeAction(WorkerDaemon daemon, WrappedDaemonAction<T> workerAction, final T subject) {
@@ -64,7 +64,7 @@ public class DefaultWorkerDaemonAdapter implements WorkerDaemonAdapter {
     }
 
     @Override
-    public <T extends Serializable, R extends Serializable> List<R> executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, Iterable<T> subjects) {
+    public <T extends Serializable, R extends Serializable> List<R> executeAllInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, Iterable<T> subjects) {
         List<R> results = Lists.newArrayList();
         Iterator<T> itr = subjects == null ? Iterators.<T>emptyIterator() : subjects.iterator();
         if (itr.hasNext()) {
@@ -80,7 +80,7 @@ public class DefaultWorkerDaemonAdapter implements WorkerDaemonAdapter {
 
     @Override
     public <T extends Serializable, R extends Serializable> R executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, T subject) {
-        List<R> results = executeInDaemon(workingDir, forkOptions, transformer, Lists.<T>newArrayList(subject));
+        List<R> results = executeAllInDaemon(workingDir, forkOptions, transformer, Lists.<T>newArrayList(subject));
         if (results.size() > 0) {
             return results.get(0);
         } else {
