@@ -18,6 +18,8 @@ package org.gradle.process.daemon;
 
 import org.gradle.api.Action;
 import org.gradle.api.Transformer;
+import org.gradle.internal.exceptions.MultiCauseException;
+import org.gradle.process.JavaForkOptions;
 
 import java.io.File;
 import java.io.Serializable;
@@ -26,44 +28,52 @@ import java.util.List;
 public interface WorkerDaemonAdapter {
 
     /**
-     * Executes a set of actions that should be performed in a daemonized process.  Throws an exception if any action fails.
+     * Executes a set of actions that should be performed in a daemonized process.  Actions are executed
+     * sequentially and synchronously.  All actions will be processed and any failures that occur will be
+     * thrown in a {@link MultiCauseException}.
      *
-     * @param workingDir - The working directory of the daemonized process.
      * @param forkOptions - The process-related options that the daemon should be compatible with.
-     * @param action - The implementation of the action to perform.
+     * @param classpath - The classpath required to run the action.
+     * @param sharedPackages - The packages that should be visible in the daemon process.
+     * @param actionClass - The implementation class of the action to perform.
      * @param subjects - The set of subjects to perform the action against.
      */
-    <T extends Serializable> void executeAllInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, Iterable<T> subjects);
+    <T extends Serializable> void executeAllInDaemon(JavaForkOptions forkOptions, Iterable<File> classpath, Iterable<String> sharedPackages, Class<? extends Action<T>> actionClass, Iterable<T> subjects);
 
     /**
      * Executes a single action that should be performed in a daemonized process.  Throws an exception if the action fails.
      *
-     * @param workingDir - The working directory of the daemonized process.
      * @param forkOptions - The process-related options that the daemon should be compatible with.
-     * @param action - The implementation of the action to perform.
+     * @param classpath - The classpath required to run the action.
+     * @param sharedPackages - The packages that should be visible in the daemon process.
+     * @param actionClass - The implementation class of the action to perform.
      * @param subject - The subject to perform the action against.
      */
-    <T extends Serializable> void executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Action<T> action, T subject);
+    <T extends Serializable> void executeInDaemon(JavaForkOptions forkOptions, Iterable<File> classpath, Iterable<String> sharedPackages, Class<? extends Action<T>> actionClass, T subject);
 
     /**
-     * Executes a batch of transformations to be performed in a daemonized process. Throws an exception if any transformation fails.
+     * Executes a set of transforms that should be performed in a daemonized process.  Transforms are executed
+     * sequentially and synchronously.  All transforms will be processed and any failures that occur will be
+     * thrown in a {@link MultiCauseException}.
      *
-     * @param workingDir - The working directory of the daemonized process.
      * @param forkOptions - The process-related options that the daemon should be compatible with.
-     * @param transformer - The transformation that should be performed.
+     * @param classpath - The classpath required to run the action.
+     * @param sharedPackages - The packages that should be visible in the daemon process.
+     * @param transformerClass - The implementation class of the transformer to invoke.
      * @param subjects - The set of inputs to the transformations.
      * @return - A list of results from the transformations.
      */
-    <T extends Serializable, R extends Serializable> List<R> executeAllInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, Iterable<T> subjects);
+    <T extends Serializable, R extends Serializable> List<R> transformAllInDaemon(JavaForkOptions forkOptions, Iterable<File> classpath, Iterable<String> sharedPackages, Class<? extends Transformer<R, T>> transformerClass, Iterable<T> subjects);
 
     /**
      * Executes a single transformation to be performed in a daemonized process. Throws an exception if the transformation fails.
      *
-     * @param workingDir - The working directory of the daemonized process.
      * @param forkOptions - The process-related options that the daemon should be compatible with.
-     * @param transformer - The transformation that should be performed.
+     * @param classpath - The classpath required to run the action.
+     * @param sharedPackages - The packages that should be visible in the daemon process.
+     * @param transformerClass - The implementation class of the transformer to invoke.
      * @param subject - The input to the transformation.
      * @return - The result of the transformation.
      */
-    <T extends Serializable, R extends Serializable> R executeInDaemon(File workingDir, DaemonForkOptions forkOptions, Transformer<R, T> transformer, T subject);
+    <T extends Serializable, R extends Serializable> R transformInDaemon(JavaForkOptions forkOptions, Iterable<File> classpath, Iterable<String> sharedPackages, Class<? extends Transformer<R, T>> transformerClass, T subject);
 }

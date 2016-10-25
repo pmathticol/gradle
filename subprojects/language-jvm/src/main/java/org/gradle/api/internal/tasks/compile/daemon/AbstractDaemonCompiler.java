@@ -67,8 +67,13 @@ public abstract class AbstractDaemonCompiler<T extends CompileSpec> implements C
         }
 
         @Override
-        public WorkResult execute(T spec) {
-            return compiler.execute(spec);
+        public WorkerDaemonResult execute(T spec) {
+            try {
+                WorkResult result = compiler.execute(spec);
+                return new WorkerDaemonResult(true, null);
+            } catch (Throwable t) {
+                return new WorkerDaemonResult(true, t);
+            }
         }
     }
 }

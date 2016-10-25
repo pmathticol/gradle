@@ -56,12 +56,13 @@ class WorkerDaemonTaskIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void taskAction() {
-                    executeAllInDaemon(new MyAction(), list.collect { it as String })
+                    executeAllInDaemon(MyAction, list.collect { it as String })
                 }
             }
 
             task runActions(type: MyWorkerDaemonTask) {
                 list = ${list}
+                //forkOptions.jvmArgs("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
             }
         """
 
@@ -75,7 +76,6 @@ class WorkerDaemonTaskIntegrationTest extends AbstractIntegrationSpec {
         }
     }
 
-    @NotYetImplemented
     def "can specify custom transform from buildSrc to perform in a daemon"() {
         def outputFileDir = file("build/worker")
         def outputFileDirPath = TextUtil.normaliseFileSeparators(outputFileDir.absolutePath)
@@ -110,20 +110,20 @@ class WorkerDaemonTaskIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void taskAction() {
-                    List<File> files = executeAllInDaemon(new MyTransformer(), list.collect { it as String })
+                    List<File> files = transformAllInDaemon(MyTransformer, list.collect { it as String })
                     list.each { subject ->
-                        assert files.contains(file("${outputFileDirPath}/\${subject}"))
+                        assert files.contains(project.file("${outputFileDirPath}/\${subject}"))
                     }
                 }
             }
 
-            task runActions(type: MyWorkerDaemonTask) {
+            task runTransforms(type: MyWorkerDaemonTask) {
                 list = ${list}
             }
         """
 
         when:
-        succeeds("runActions")
+        succeeds("runTransforms")
 
         then:
         list.each {
@@ -162,7 +162,7 @@ class WorkerDaemonTaskIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void taskAction() {
-                    executeAllInDaemon(action, specs.collect { it as String })
+                    executeAllInDaemon(action.getClass(), specs.collect { it as String })
                 }
             }
 

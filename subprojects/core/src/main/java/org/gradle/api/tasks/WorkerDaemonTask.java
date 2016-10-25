@@ -75,61 +75,19 @@ public abstract class WorkerDaemonTask extends DefaultTask {
         this.classpath = classpath;
     }
 
-    protected <T extends Serializable> void executeAllInDaemon(Action<T> action, Iterable<T> subjects) {
-        Iterator<T> itr = subjects == null ? Iterators.<T>emptyIterator() : subjects.iterator();
-        if (itr.hasNext()) {
-            T subject = itr.next();
-            getWorkerDaemonAdapter().executeAllInDaemon(getProject().getProjectDir(), getDaemonOptions(action.getClass(), subject.getClass()), action, subjects);
-        }
+    protected <T extends Serializable> void executeAllInDaemon(Class<? extends Action<T>> actionClass, Iterable<T> subjects) {
+        getWorkerDaemonAdapter().executeAllInDaemon(forkOptions, classpath, sharedPackages, actionClass, subjects);
     }
 
-    protected <T extends Serializable> void executeInDaemon(Action<T> action, T subject) {
-        getWorkerDaemonAdapter().executeInDaemon(getProject().getProjectDir(), getDaemonOptions(action.getClass(), subject.getClass()), action, subject);
+    protected <T extends Serializable> void executeInDaemon(Class<? extends Action<T>> actionClass, T subject) {
+        getWorkerDaemonAdapter().executeInDaemon(forkOptions, classpath, sharedPackages, actionClass, subject);
     }
 
-    protected <T extends Serializable, R extends Serializable> List<R> executeAllInDaemon(Transformer<R, T> transformer, Iterable<T> subjects) {
-        Iterator<T> itr = subjects == null ? Iterators.<T>emptyIterator() : subjects.iterator();
-        if (itr.hasNext()) {
-            T subject = itr.next();
-            return getWorkerDaemonAdapter().executeAllInDaemon(getProject().getProjectDir(), getDaemonOptions(transformer.getClass(), subject.getClass()), transformer, subjects);
-        } else {
-            return Lists.newArrayList();
-        }
+    protected <T extends Serializable, R extends Serializable> List<R> transformAllInDaemon(Class<? extends Transformer<R, T>> transformerClass, Iterable<T> subjects) {
+        return getWorkerDaemonAdapter().transformAllInDaemon(forkOptions, classpath, sharedPackages, transformerClass, subjects);
     }
 
-    protected <T extends Serializable, R extends Serializable> R executeInDaemon(Transformer<R, T> transformer, T subject) {
-        return getWorkerDaemonAdapter().executeInDaemon(getProject().getProjectDir(), getDaemonOptions(transformer.getClass(), subject.getClass()), transformer, subject);
+    protected <T extends Serializable, R extends Serializable> R transformInDaemon(Class<? extends Transformer<R, T>> transformerClass, T subject) {
+        return getWorkerDaemonAdapter().transformInDaemon(forkOptions, classpath, sharedPackages, transformerClass, subject);
     }
-
-    private DaemonForkOptions getDaemonOptions(Class<?> actionClass, Class<? extends Serializable> subjectClass) {
-        ImmutableList.Builder<File> classpathBuilder = ImmutableList.builder();
-        if (classpath != null) {
-            classpathBuilder.addAll(classpath.getFiles());
-        }
-
-        classpathBuilder.add(ClasspathUtil.getClasspathForClass(Action.class));
-        classpathBuilder.add(ClasspathUtil.getClasspathForClass(actionClass));
-        if (subjectClass.getClassLoader() != null) {
-            classpathBuilder.add(ClasspathUtil.getClasspathForClass(subjectClass));
-        }
-        Iterable<File> daemonClasspath = classpathBuilder.build();
-
-        ImmutableList.Builder<String> sharedPackagesBuilder = ImmutableList.builder();
-        if (sharedPackages != null) {
-            sharedPackagesBuilder.addAll(sharedPackages);
-        }
-
-        if (actionClass.getPackage() != null) {
-            sharedPackagesBuilder.add(actionClass.getPackage().getName());
-        }
-        if (subjectClass.getPackage() != null) {
-            sharedPackagesBuilder.add(subjectClass.getPackage().getName());
-        }
-        sharedPackagesBuilder.add("org.gradle.api");
-        Iterable<String> daemonSharedPackages = sharedPackagesBuilder.build();
-
-        return new DaemonForkOptions(forkOptions.getMinHeapSize(), forkOptions.getMaxHeapSize(), forkOptions.getAllJvmArgs(), daemonClasspath, daemonSharedPackages);
-    }
-
-
 }
